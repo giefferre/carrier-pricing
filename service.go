@@ -77,12 +77,25 @@ type GetQuotesByCarrierArgs GetQuotesByVehicleArgs
 // GetQuotesByCarrierResponse is the response object for the GetQuotesByCarrier method.
 type GetQuotesByCarrierResponse struct {
 	GetQuotesByCarrierArgs
-	PriceList []struct {
-		ServiceName   string `json:"service"`
-		Price         int64  `json:"price"`
-		DeliveryTyime int64  `json:"delivery_time"`
-	} `json:"price_list"`
+	PriceList PriceByCarrierList `json:"price_list"`
 }
+
+// PriceByCarrier is the object returned in the GetQuotesByCarrierResponse
+// indicating the service price and delivery time for a specific carrier
+// matching the request.
+type PriceByCarrier struct {
+	CarrierName  string `json:"service"`
+	Amount       int64  `json:"price"`
+	DeliveryTime int64  `json:"delivery_time"`
+}
+
+// PriceByCarrierList is a list of PriceByCarrier.
+// This struct has been created to apply sorting convenience methods.
+type PriceByCarrierList []PriceByCarrier
+
+func (pbcl PriceByCarrierList) Len() int           { return len(pbcl) }
+func (pbcl PriceByCarrierList) Swap(i, j int)      { pbcl[i], pbcl[j] = pbcl[j], pbcl[i] }
+func (pbcl PriceByCarrierList) Less(i, j int) bool { return pbcl[i].Amount < pbcl[j].Amount }
 
 // ServiceInterface defines the interface of the Service.
 // This is meant to be used from main/external packages, allowing to mock the service itself.
