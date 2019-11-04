@@ -35,13 +35,13 @@ PLEASE NOTE: to provide SSL features, the application will use [Caddy Server](ht
 
 You can run tests by executing the `make tests` command.
 
-## Implementing Carrier Finder services
+## Implementing a new Carrier Service Finder
 
-A CarrierFinder service is piece of software used from the package for the `GetQuotesByCarrier` method.
+A CarrierServiceFinder is piece of software used from the package for the `GetQuotesByCarrier` method.
 
 Its aim is to provide the carrierpricing a list of Carriers supporting a specific vehicle.
 
-In this repository a simple CarrierFinder is implemented, but you can implement your own.
+In this repository a couple of simple CarrierServiceFinders is implemented, but you can implement your own.
 
 All you need to do is to implement a struct with the following interface:
 
@@ -92,3 +92,5 @@ func (mcsf *MockCarrierServiceFinder) FindCarrierServicesForVehicle(vehicleType 
 	return
 }
 ```
+
+The list of the available CarrierServiceFinders is available [here](carrierservicefinders).
