@@ -4,6 +4,8 @@ services:
   carrierpricing:
     build: .
     container_name: carrierpricing
+    environment:
+      CSF_JSON_FILE: "carriers.json"
 
   caddy:
     image: abiosoft/caddy
