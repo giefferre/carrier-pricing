@@ -88,6 +88,24 @@ func (s *HTTPServer) getQuotesByVehicleHandler(w http.ResponseWriter, r *http.Re
 }
 
 func (s *HTTPServer) getQuotesByCarrierHandler(w http.ResponseWriter, r *http.Request) {
+	// decode the request into a GetQuotesByCarrierArgs object
+	requestObject := &carrierpricing.GetQuotesByCarrierArgs{}
+
+	err := decodeRequestBodyAsRequestObject(r.Body, &requestObject)
+	if err != nil {
+		s.logger.Println(err)
+		http.Error(w, errMessageInternalServerError, http.StatusInternalServerError)
+		return
+	}
+
+	responseObject, err := s.service.GetQuotesByCarrier(*requestObject)
+	if err != nil {
+		s.logger.Println(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	writeResponse(w, responseObject)
 }
 
 // decodeRequestBodyAsRequestObject is a utility method which abstracts the way an
