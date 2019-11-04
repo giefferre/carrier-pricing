@@ -34,3 +34,61 @@ PLEASE NOTE: to provide SSL features, the application will use [Caddy Server](ht
 ## Tests
 
 You can run tests by executing the `make tests` command.
+
+## Implementing Carrier Finder services
+
+A CarrierFinder service is piece of software used from the package for the `GetQuotesByCarrier` method.
+
+Its aim is to provide the carrierpricing a list of Carriers supporting a specific vehicle.
+
+In this repository a simple CarrierFinder is implemented, but you can implement your own.
+
+All you need to do is to implement a struct with the following interface:
+
+```go
+    FindCarrierServicesForVehicle(vehicleType string) []carrierpricing.CarrierService
+```
+
+### Example
+
+```go
+package mockcarrierservicefinder
+
+import (
+	"github.com/giefferre/carrierpricing"
+)
+
+// MockCarrierServiceFinder implements a CarrierServiceFinder interface,
+// returning static data.
+type MockCarrierServiceFinder struct{}
+
+// New returns a new MockCarrierServiceFinder object.
+func New() *MockCarrierServiceFinder {
+	return &MockCarrierServiceFinder{}
+}
+
+// FindCarrierServicesForVehicle returns mock, static data.
+func (mcsf *MockCarrierServiceFinder) FindCarrierServicesForVehicle(vehicleType string) (availableCarrierServices []carrierpricing.CarrierService) {
+	switch vehicleType {
+	case carrierpricing.VehicleTypeSmallVan:
+		availableCarrierServices = []carrierpricing.CarrierService{
+			carrierpricing.CarrierService{
+				Name:         "RoyalPackages",
+				Markup:       80,
+				DeliveryTime: 1,
+			},
+			carrierpricing.CarrierService{
+				Name:         "Hercules",
+				Markup:       35,
+				DeliveryTime: 5,
+			},
+			carrierpricing.CarrierService{
+				Name:         "CollectTimes",
+				Markup:       70,
+				DeliveryTime: 1,
+			},
+		}
+	}
+	return
+}
+```
