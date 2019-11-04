@@ -81,11 +81,9 @@ func TestGetBasicQuote(t *testing.T) {
 				DeliveryPostcode: "EC2A3LT",
 			},
 			ExpectedResult: &GetBasicQuoteResponse{
-				GetBasicQuoteArgs: GetBasicQuoteArgs{
-					PickupPostcode:   "SW1A1AA",
-					DeliveryPostcode: "EC2A3LT",
-				},
-				Price: 316,
+				PickupPostcode:   "SW1A1AA",
+				DeliveryPostcode: "EC2A3LT",
+				Price:            316,
 			},
 			ExpectedError: nil,
 		},
@@ -127,14 +125,12 @@ func TestGetQuotesByVehicleLogs(t *testing.T) {
 	service := NewService(logger, csf)
 
 	service.GetQuotesByVehicle(GetQuotesByVehicleArgs{
-		GetBasicQuoteArgs{
-			"FROM",
-			"TO",
-		},
+		"FROM",
+		"TO",
 		"bicycle",
 	})
 
-	expectedLogString := "executing GetQuotesByVehicle with args: {{FROM TO} bicycle}\n"
+	expectedLogString := "executing GetQuotesByVehicle with args: {FROM TO bicycle}\n"
 	actualLogString := logDestination.String()
 
 	if expectedLogString != logDestination.String() {
@@ -151,11 +147,9 @@ func TestGetQuotesByVehicle(t *testing.T) {
 		// case #1 invalid PickupPostcode argument
 		{
 			Arguments: GetQuotesByVehicleArgs{
-				GetBasicQuoteArgs{
-					PickupPostcode:   "_",
-					DeliveryPostcode: "EC2A3LT",
-				},
-				"bicycle",
+				PickupPostcode:   "_",
+				DeliveryPostcode: "EC2A3LT",
+				Vehicle:          "bicycle",
 			},
 			ExpectedResult: nil,
 			ExpectedError:  errors.New("strconv.ParseInt: parsing \"_\": invalid syntax"),
@@ -163,11 +157,9 @@ func TestGetQuotesByVehicle(t *testing.T) {
 		// case #2 invalid DeliveryPostcode argument
 		{
 			Arguments: GetQuotesByVehicleArgs{
-				GetBasicQuoteArgs{
-					PickupPostcode:   "SW1A1AA",
-					DeliveryPostcode: "",
-				},
-				"bicycle",
+				PickupPostcode:   "SW1A1AA",
+				DeliveryPostcode: "",
+				Vehicle:          "bicycle",
 			},
 			ExpectedResult: nil,
 			ExpectedError:  errors.New("strconv.ParseInt: parsing \"\": invalid syntax"),
@@ -175,11 +167,9 @@ func TestGetQuotesByVehicle(t *testing.T) {
 		// case #3 invalid Vehicle argument
 		{
 			Arguments: GetQuotesByVehicleArgs{
-				GetBasicQuoteArgs{
-					PickupPostcode:   "SW1A1AA",
-					DeliveryPostcode: "EC2A3LT",
-				},
-				"scooter",
+				PickupPostcode:   "SW1A1AA",
+				DeliveryPostcode: "EC2A3LT",
+				Vehicle:          "scooter",
 			},
 			ExpectedResult: nil,
 			ExpectedError:  errors.New("invalid vehicle provided"),
@@ -187,21 +177,15 @@ func TestGetQuotesByVehicle(t *testing.T) {
 		// case #4 valid request, expected result
 		{
 			Arguments: GetQuotesByVehicleArgs{
-				GetBasicQuoteArgs{
-					PickupPostcode:   "SW1A1AA",
-					DeliveryPostcode: "EC2A3LT",
-				},
-				"bicycle",
+				PickupPostcode:   "SW1A1AA",
+				DeliveryPostcode: "EC2A3LT",
+				Vehicle:          "bicycle",
 			},
 			ExpectedResult: &GetQuotesByVehicleResponse{
-				GetQuotesByVehicleArgs: GetQuotesByVehicleArgs{
-					GetBasicQuoteArgs: GetBasicQuoteArgs{
-						PickupPostcode:   "SW1A1AA",
-						DeliveryPostcode: "EC2A3LT",
-					},
-					Vehicle: "bicycle",
-				},
-				Price: 348,
+				PickupPostcode:   "SW1A1AA",
+				DeliveryPostcode: "EC2A3LT",
+				Vehicle:          "bicycle",
+				Price:            348,
 			},
 			ExpectedError: nil,
 		},
@@ -243,14 +227,12 @@ func TestGetQuotesByCarrierLogs(t *testing.T) {
 	service := NewService(logger, csf)
 
 	service.GetQuotesByCarrier(GetQuotesByCarrierArgs{
-		GetBasicQuoteArgs{
-			"FROM",
-			"TO",
-		},
+		"FROM",
+		"TO",
 		"small_van",
 	})
 
-	expectedLogString := "executing GetQuotesByCarrier with args: {{FROM TO} small_van}\n"
+	expectedLogString := "executing GetQuotesByCarrier with args: {FROM TO small_van}\n"
 	actualLogString := logDestination.String()
 
 	if expectedLogString != logDestination.String() {
@@ -267,11 +249,9 @@ func TestGetQuotesByCarrier(t *testing.T) {
 		// case #1 invalid PickupPostcode argument
 		{
 			Arguments: GetQuotesByCarrierArgs{
-				GetBasicQuoteArgs{
-					PickupPostcode:   "_",
-					DeliveryPostcode: "EC2A3LT",
-				},
-				"bicycle",
+				PickupPostcode:   "_",
+				DeliveryPostcode: "EC2A3LT",
+				Vehicle:          "bicycle",
 			},
 			ExpectedResult: nil,
 			ExpectedError:  errors.New("strconv.ParseInt: parsing \"_\": invalid syntax"),
@@ -279,11 +259,9 @@ func TestGetQuotesByCarrier(t *testing.T) {
 		// case #2 invalid DeliveryPostcode argument
 		{
 			Arguments: GetQuotesByCarrierArgs{
-				GetBasicQuoteArgs{
-					PickupPostcode:   "SW1A1AA",
-					DeliveryPostcode: "",
-				},
-				"bicycle",
+				PickupPostcode:   "SW1A1AA",
+				DeliveryPostcode: "",
+				Vehicle:          "bicycle",
 			},
 			ExpectedResult: nil,
 			ExpectedError:  errors.New("strconv.ParseInt: parsing \"\": invalid syntax"),
@@ -291,11 +269,9 @@ func TestGetQuotesByCarrier(t *testing.T) {
 		// case #3 invalid Vehicle argument
 		{
 			Arguments: GetQuotesByCarrierArgs{
-				GetBasicQuoteArgs{
-					PickupPostcode:   "SW1A1AA",
-					DeliveryPostcode: "EC2A3LT",
-				},
-				"scooter",
+				PickupPostcode:   "SW1A1AA",
+				DeliveryPostcode: "EC2A3LT",
+				Vehicle:          "scooter",
 			},
 			ExpectedResult: nil,
 			ExpectedError:  errors.New("invalid vehicle provided"),
@@ -303,11 +279,9 @@ func TestGetQuotesByCarrier(t *testing.T) {
 		// case #4 carrier service finder gives 0 results
 		{
 			Arguments: GetQuotesByCarrierArgs{
-				GetBasicQuoteArgs{
-					PickupPostcode:   "SW1A1AA",
-					DeliveryPostcode: "EC2A3LT",
-				},
-				"bicycle", // vehicle is valid but the provider has no carrier services for it
+				PickupPostcode:   "SW1A1AA",
+				DeliveryPostcode: "EC2A3LT",
+				Vehicle:          "bicycle", // vehicle is valid but the provider has no carrier services for it
 			},
 			ExpectedResult: nil,
 			ExpectedError:  errors.New("no available carrier services for the given vehicle"),
@@ -315,20 +289,14 @@ func TestGetQuotesByCarrier(t *testing.T) {
 		// case #5 valid request, expected result
 		{
 			Arguments: GetQuotesByCarrierArgs{
-				GetBasicQuoteArgs{
-					PickupPostcode:   "SW1A1AA",
-					DeliveryPostcode: "EC2A3LT",
-				},
-				"small_van",
+				PickupPostcode:   "SW1A1AA",
+				DeliveryPostcode: "EC2A3LT",
+				Vehicle:          "small_van",
 			},
 			ExpectedResult: &GetQuotesByCarrierResponse{
-				GetQuotesByCarrierArgs: GetQuotesByCarrierArgs{
-					GetBasicQuoteArgs: GetBasicQuoteArgs{
-						PickupPostcode:   "SW1A1AA",
-						DeliveryPostcode: "EC2A3LT",
-					},
-					Vehicle: "small_van",
-				},
+				PickupPostcode:   "SW1A1AA",
+				DeliveryPostcode: "EC2A3LT",
+				Vehicle:          "small_van",
 				PriceList: PriceByCarrierList{
 					PriceByCarrier{
 						CarrierName:  "MockService2",

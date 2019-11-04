@@ -57,20 +57,24 @@ type GetBasicQuoteArgs struct {
 
 // GetBasicQuoteResponse is the response object for the GetBasicQuote method.
 type GetBasicQuoteResponse struct {
-	GetBasicQuoteArgs
-	Price int64 `json:"price"`
+	PickupPostcode   string `json:"pickup_postcode"`
+	DeliveryPostcode string `json:"delivery_postcode"`
+	Price            int64  `json:"price"`
 }
 
 // GetQuotesByVehicleArgs contains arguments for the GetQuotesByVehicle method.
 type GetQuotesByVehicleArgs struct {
-	GetBasicQuoteArgs
-	Vehicle string `json:"vehicle"`
+	PickupPostcode   string `json:"pickup_postcode"`
+	DeliveryPostcode string `json:"delivery_postcode"`
+	Vehicle          string `json:"vehicle"`
 }
 
 // GetQuotesByVehicleResponse is the response object for the GetQuotesByVehicle method.
 type GetQuotesByVehicleResponse struct {
-	GetQuotesByVehicleArgs
-	Price int64 `json:"price"`
+	PickupPostcode   string `json:"pickup_postcode"`
+	DeliveryPostcode string `json:"delivery_postcode"`
+	Vehicle          string `json:"vehicle"`
+	Price            int64  `json:"price"`
 }
 
 // GetQuotesByCarrierArgs contains arguments for the GetQuotesByCarrier method.
@@ -78,8 +82,11 @@ type GetQuotesByCarrierArgs GetQuotesByVehicleArgs
 
 // GetQuotesByCarrierResponse is the response object for the GetQuotesByCarrier method.
 type GetQuotesByCarrierResponse struct {
-	GetQuotesByCarrierArgs
-	PriceList PriceByCarrierList `json:"price_list"`
+	PickupPostcode   string             `json:"pickup_postcode"`
+	DeliveryPostcode string             `json:"delivery_postcode"`
+	Vehicle          string             `json:"vehicle"`
+	Price            int64              `json:"price"`
+	PriceList        PriceByCarrierList `json:"price_list"`
 }
 
 // PriceByCarrier is the object returned in the GetQuotesByCarrierResponse
@@ -132,11 +139,9 @@ func (s *Service) GetBasicQuote(args GetBasicQuoteArgs) (*GetBasicQuoteResponse,
 	}
 
 	return &GetBasicQuoteResponse{
-		GetBasicQuoteArgs: GetBasicQuoteArgs{
-			PickupPostcode:   args.PickupPostcode,
-			DeliveryPostcode: args.DeliveryPostcode,
-		},
-		Price: *basePrice,
+		PickupPostcode:   args.PickupPostcode,
+		DeliveryPostcode: args.DeliveryPostcode,
+		Price:            *basePrice,
 	}, nil
 }
 
@@ -158,14 +163,10 @@ func (s *Service) GetQuotesByVehicle(args GetQuotesByVehicleArgs) (*GetQuotesByV
 	priceByVehicle := s.applyVehicleMarkup(*basePrice, args.Vehicle)
 
 	return &GetQuotesByVehicleResponse{
-		GetQuotesByVehicleArgs: GetQuotesByVehicleArgs{
-			GetBasicQuoteArgs: GetBasicQuoteArgs{
-				PickupPostcode:   args.PickupPostcode,
-				DeliveryPostcode: args.DeliveryPostcode,
-			},
-			Vehicle: args.Vehicle,
-		},
-		Price: priceByVehicle,
+		PickupPostcode:   args.PickupPostcode,
+		DeliveryPostcode: args.DeliveryPostcode,
+		Vehicle:          args.Vehicle,
+		Price:            priceByVehicle,
 	}, nil
 }
 
@@ -194,14 +195,10 @@ func (s *Service) GetQuotesByCarrier(args GetQuotesByCarrierArgs) (*GetQuotesByC
 	priceList := s.getPriceListFromPriceAndCarrierServices(priceByVehicle, availableCarrierServices)
 
 	return &GetQuotesByCarrierResponse{
-		GetQuotesByCarrierArgs: GetQuotesByCarrierArgs{
-			GetBasicQuoteArgs: GetBasicQuoteArgs{
-				PickupPostcode:   args.PickupPostcode,
-				DeliveryPostcode: args.DeliveryPostcode,
-			},
-			Vehicle: args.Vehicle,
-		},
-		PriceList: priceList,
+		PickupPostcode:   args.PickupPostcode,
+		DeliveryPostcode: args.DeliveryPostcode,
+		Vehicle:          args.Vehicle,
+		PriceList:        priceList,
 	}, nil
 }
 
