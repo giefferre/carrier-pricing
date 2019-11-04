@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 	"math"
+	"sort"
 	"strconv"
 )
 
@@ -43,8 +44,9 @@ var VehiclesMarkupTable = map[string]float64{
 }
 
 var (
-	errInvalidVehicle   = errors.New("invalid vehicle provided")
-	errMarkupNotPresent = errors.New("markup not present")
+	errInvalidVehicle                       = errors.New("invalid vehicle provided")
+	errMarkupNotPresent                     = errors.New("markup not present")
+	errNoAvailableCarrierServicesForVehicle = errors.New("no available carrier services for the given vehicle")
 )
 
 // GetBasicQuoteArgs contains arguments for the GetBasicQuote method.
@@ -171,7 +173,36 @@ func (s *Service) GetQuotesByVehicle(args GetQuotesByVehicleArgs) (*GetQuotesByV
 // post codes according to a specified vehicle and all the available carriers. A
 // markup is applied to the basic price for both the vehicle type and the carriers.
 func (s *Service) GetQuotesByCarrier(args GetQuotesByCarrierArgs) (*GetQuotesByCarrierResponse, error) {
-	return nil, errors.New("not implemented")
+	s.logger.Printf("executing GetQuotesByCarrier with args: %v\n", args)
+
+	if !s.isVehicleValid(args.Vehicle) {
+		return nil, errInvalidVehicle
+	}
+
+	basePrice, err := s.calculateBasePrice(args.PickupPostcode, args.DeliveryPostcode)
+	if err != nil {
+		return nil, err
+	}
+
+	priceByVehicle := s.applyVehicleMarkup(*basePrice, args.Vehicle)
+
+	availableCarrierServices := s.carrierServiceFinder.FindCarrierServicesForVehicle(args.Vehicle)
+	if len(availableCarrierServices) == 0 {
+		return nil, errNoAvailableCarrierServicesForVehicle
+	}
+
+	priceList := s.getPriceListFromPriceAndCarrierServices(priceByVehicle, availableCarrierServices)
+
+	return &GetQuotesByCarrierResponse{
+		GetQuotesByCarrierArgs: GetQuotesByCarrierArgs{
+			GetBasicQuoteArgs: GetBasicQuoteArgs{
+				PickupPostcode:   args.PickupPostcode,
+				DeliveryPostcode: args.DeliveryPostcode,
+			},
+			Vehicle: args.Vehicle,
+		},
+		PriceList: priceList,
+	}, nil
 }
 
 func (s *Service) calculateBasePrice(pickupPostcode, deliveryPostcode string) (*int64, error) {
@@ -207,4 +238,19 @@ func (s *Service) applyVehicleMarkup(basePrice int64, vehicleType string) int64 
 	}
 
 	return int64(math.RoundToEven(float64(basePrice) * markup))
+}
+
+func (s *Service) getPriceListFromPriceAndCarrierServices(priceByVehicle int64, availableCarrierServices []CarrierService) PriceByCarrierList {
+	priceList := PriceByCarrierList{}
+	for _, carrierService := range availableCarrierServices {
+		priceList = append(priceList, PriceByCarrier{
+			CarrierName:  carrierService.Name,
+			Amount:       priceByVehicle + carrierService.Markup,
+			DeliveryTime: carrierService.DeliveryTime,
+		})
+	}
+
+	sort.Sort(priceList)
+
+	return priceList
 }

@@ -232,6 +232,146 @@ func TestGetQuotesByVehicle(t *testing.T) {
 		}
 	}
 }
+
+func TestGetQuotesByCarrierLogs(t *testing.T) {
+	// tests that the GetQuotesByCarrier logs the execution
+	logDestination := bytes.NewBufferString("")
+
+	logger := log.New(logDestination, "", 0)
+	csf := &mockCarrierServiceFinder{}
+
+	service := NewService(logger, csf)
+
+	service.GetQuotesByCarrier(GetQuotesByCarrierArgs{
+		GetBasicQuoteArgs{
+			"FROM",
+			"TO",
+		},
+		"small_van",
+	})
+
+	expectedLogString := "executing GetQuotesByCarrier with args: {{FROM TO} small_van}\n"
+	actualLogString := logDestination.String()
+
+	if expectedLogString != logDestination.String() {
+		t.Fatalf("expected log message was not received, had %v", actualLogString)
+	}
+}
+
+func TestGetQuotesByCarrier(t *testing.T) {
+	tests := []struct {
+		Arguments      GetQuotesByCarrierArgs
+		ExpectedResult *GetQuotesByCarrierResponse
+		ExpectedError  error
+	}{
+		// case #1 invalid PickupPostcode argument
+		{
+			Arguments: GetQuotesByCarrierArgs{
+				GetBasicQuoteArgs{
+					PickupPostcode:   "_",
+					DeliveryPostcode: "EC2A3LT",
+				},
+				"bicycle",
+			},
+			ExpectedResult: nil,
+			ExpectedError:  errors.New("strconv.ParseInt: parsing \"_\": invalid syntax"),
+		},
+		// case #2 invalid DeliveryPostcode argument
+		{
+			Arguments: GetQuotesByCarrierArgs{
+				GetBasicQuoteArgs{
+					PickupPostcode:   "SW1A1AA",
+					DeliveryPostcode: "",
+				},
+				"bicycle",
+			},
+			ExpectedResult: nil,
+			ExpectedError:  errors.New("strconv.ParseInt: parsing \"\": invalid syntax"),
+		},
+		// case #3 invalid Vehicle argument
+		{
+			Arguments: GetQuotesByCarrierArgs{
+				GetBasicQuoteArgs{
+					PickupPostcode:   "SW1A1AA",
+					DeliveryPostcode: "EC2A3LT",
+				},
+				"scooter",
+			},
+			ExpectedResult: nil,
+			ExpectedError:  errors.New("invalid vehicle provided"),
+		},
+		// case #4 carrier service finder gives 0 results
+		{
+			Arguments: GetQuotesByCarrierArgs{
+				GetBasicQuoteArgs{
+					PickupPostcode:   "SW1A1AA",
+					DeliveryPostcode: "EC2A3LT",
+				},
+				"bicycle", // vehicle is valid but the provider has no carrier services for it
+			},
+			ExpectedResult: nil,
+			ExpectedError:  errors.New("no available carrier services for the given vehicle"),
+		},
+		// case #5 valid request, expected result
+		{
+			Arguments: GetQuotesByCarrierArgs{
+				GetBasicQuoteArgs{
+					PickupPostcode:   "SW1A1AA",
+					DeliveryPostcode: "EC2A3LT",
+				},
+				"small_van",
+			},
+			ExpectedResult: &GetQuotesByCarrierResponse{
+				GetQuotesByCarrierArgs: GetQuotesByCarrierArgs{
+					GetBasicQuoteArgs: GetBasicQuoteArgs{
+						PickupPostcode:   "SW1A1AA",
+						DeliveryPostcode: "EC2A3LT",
+					},
+					Vehicle: "small_van",
+				},
+				PriceList: PriceByCarrierList{
+					PriceByCarrier{
+						CarrierName:  "MockService2",
+						Amount:       421,
+						DeliveryTime: 5,
+					},
+					PriceByCarrier{
+						CarrierName:  "MockService1",
+						Amount:       431,
+						DeliveryTime: 1,
+					},
+				},
+			},
+			ExpectedError: nil,
+		},
+	}
+
+	logger := log.New(os.Stdout, "", log.LstdFlags)
+	csf := &mockCarrierServiceFinder{}
+
+	service := NewService(logger, csf)
+
+	for _, tc := range tests {
+		result, err := service.GetQuotesByCarrier(tc.Arguments)
+		if (tc.ExpectedError != nil && err == nil) ||
+			(tc.ExpectedError == nil && err != nil) ||
+			(tc.ExpectedError != nil && err != nil && tc.ExpectedError.Error() != err.Error()) {
+			t.Fatalf(
+				"expected error '%v', received: '%v'\n",
+				tc.ExpectedError,
+				err,
+			)
+		}
+		if !reflect.DeepEqual(tc.ExpectedResult, result) {
+			t.Fatalf(
+				"expected result '%v', received: '%v'\n",
+				tc.ExpectedResult,
+				result,
+			)
+		}
+	}
+}
+
 // UTILS
 
 type mockCarrierServiceFinder struct{}
