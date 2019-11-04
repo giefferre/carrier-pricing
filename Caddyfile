@@ -1,0 +1,8 @@
+localhost:80 localhost:443 {
+    log stdout
+    tls /root/certs/localhost.cert /root/certs/localhost.pem
+
+    proxy / carrierpricing {
+        transparent
+    }
+}

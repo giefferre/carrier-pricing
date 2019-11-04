@@ -1,0 +1,18 @@
+version: "3"
+
+services:
+  carrierpricing:
+    build: .
+    container_name: carrierpricing
+
+  caddy:
+    image: abiosoft/caddy
+    environment:
+      ACME_AGREE: "true"
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - "${PROJECT_ROOT}/Caddyfile:/etc/Caddyfile"
+      - "${PROJECT_ROOT}/bin/localhost.cert:/root/certs/localhost.cert"
+      - "${PROJECT_ROOT}/bin/localhost.pem:/root/certs/localhost.pem"
