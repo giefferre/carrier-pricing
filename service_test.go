@@ -9,15 +9,19 @@ import (
 	"testing"
 )
 
+// TESTS
+
 func TestNewService(t *testing.T) {
 	// tests that NewService method returns a valid Service object
 	logger := log.New(os.Stdout, "", log.LstdFlags)
+	csf := &mockCarrierServiceFinder{}
 
 	expectedService := &Service{
-		logger: logger,
+		carrierServiceFinder: csf,
+		logger:               logger,
 	}
 
-	service := NewService(logger)
+	service := NewService(logger, csf)
 
 	if !reflect.DeepEqual(expectedService, service) {
 		t.Fatal("NewService method didn't return the correct Service object")
@@ -27,9 +31,11 @@ func TestNewService(t *testing.T) {
 func TestGetBasicQuoteLogs(t *testing.T) {
 	// tests that the GetBasicQuote logs the execution
 	logDestination := bytes.NewBufferString("")
-	logger := log.New(logDestination, "", 0)
 
-	service := NewService(logger)
+	logger := log.New(logDestination, "", 0)
+	csf := &mockCarrierServiceFinder{}
+
+	service := NewService(logger, csf)
 
 	service.GetBasicQuote(GetBasicQuoteArgs{
 		"FROM",
@@ -86,7 +92,9 @@ func TestGetBasicQuote(t *testing.T) {
 	}
 
 	logger := log.New(os.Stdout, "", log.LstdFlags)
-	service := NewService(logger)
+	csf := &mockCarrierServiceFinder{}
+
+	service := NewService(logger, csf)
 
 	for _, tc := range tests {
 		result, err := service.GetBasicQuote(tc.Arguments)
@@ -112,9 +120,11 @@ func TestGetBasicQuote(t *testing.T) {
 func TestGetQuotesByVehicleLogs(t *testing.T) {
 	// tests that the GetQuotesByVehicle logs the execution
 	logDestination := bytes.NewBufferString("")
-	logger := log.New(logDestination, "", 0)
 
-	service := NewService(logger)
+	logger := log.New(logDestination, "", 0)
+	csf := &mockCarrierServiceFinder{}
+
+	service := NewService(logger, csf)
 
 	service.GetQuotesByVehicle(GetQuotesByVehicleArgs{
 		GetBasicQuoteArgs{
@@ -198,7 +208,9 @@ func TestGetQuotesByVehicle(t *testing.T) {
 	}
 
 	logger := log.New(os.Stdout, "", log.LstdFlags)
-	service := NewService(logger)
+	csf := &mockCarrierServiceFinder{}
+
+	service := NewService(logger, csf)
 
 	for _, tc := range tests {
 		result, err := service.GetQuotesByVehicle(tc.Arguments)
@@ -219,4 +231,26 @@ func TestGetQuotesByVehicle(t *testing.T) {
 			)
 		}
 	}
+}
+// UTILS
+
+type mockCarrierServiceFinder struct{}
+
+func (mcsf *mockCarrierServiceFinder) FindCarrierServicesForVehicle(vehicleType string) (availableCarrierServices []CarrierService) {
+	switch vehicleType {
+	case VehicleTypeSmallVan:
+		availableCarrierServices = []CarrierService{
+			CarrierService{
+				Name:         "MockService1",
+				Markup:       20,
+				DeliveryTime: 1,
+			},
+			CarrierService{
+				Name:         "MockService2",
+				Markup:       10,
+				DeliveryTime: 5,
+			},
+		}
+	}
+	return
 }

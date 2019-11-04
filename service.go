@@ -107,13 +107,15 @@ type ServiceInterface interface {
 
 // Service implements the ServiceInterface exposing the required methods.
 type Service struct {
-	logger *log.Logger
+	carrierServiceFinder CarrierServiceFinder
+	logger               *log.Logger
 }
 
 // NewService returns a new Service initialized with the given parameters.
-func NewService(logger *log.Logger) *Service {
+func NewService(logger *log.Logger, carrierServiceFinder CarrierServiceFinder) *Service {
 	return &Service{
-		logger: logger,
+		carrierServiceFinder: carrierServiceFinder,
+		logger:               logger,
 	}
 }
 
